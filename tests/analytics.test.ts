@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { computeAdminAnalytics, buildCandidateProgressTimeline } from "@/lib/analytics";
+import {
+  auditCandidatePracticeContext,
+  buildCandidateProgressTimeline,
+  computeAdminAnalytics
+} from "@/lib/analytics";
 import { demoCandidates, demoSessions } from "@/lib/demo-data";
 
 describe("admin analytics", () => {
@@ -16,6 +20,8 @@ describe("admin analytics", () => {
       "Product Manager": 2,
       "Full Stack Engineer": 1
     });
+    expect(analytics.practiceContextReadyCandidates).toBe(3);
+    expect(analytics.practiceContextGaps).toEqual([]);
   });
 
   it("builds a chronological progress timeline for one candidate", () => {
@@ -37,5 +43,27 @@ describe("admin analytics", () => {
     }
 
     expect(demoCandidates[0].practiceContext.jobDescriptionSignals).toContain("activation analytics");
+  });
+
+  it("flags generic or under-evidenced practice context before sessions become canned", () => {
+    const gaps = auditCandidatePracticeContext([
+      ...demoCandidates,
+      {
+        ...demoCandidates[0],
+        id: "cand_generic",
+        practiceContext: {
+          interviewFormat: "recruiter_screen",
+          jobDescriptionSignals: ["communication", "leadership"],
+          resumeEvidenceAnchors: ["teamwork"]
+        }
+      }
+    ]);
+
+    expect(gaps).toEqual([
+      {
+        candidateId: "cand_generic",
+        missing: ["job_description_signals", "resume_evidence_anchors"]
+      }
+    ]);
   });
 });

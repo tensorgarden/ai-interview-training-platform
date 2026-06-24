@@ -329,6 +329,12 @@ export default async function Home() {
               <p className="text-sm text-slate-500">Scheduled</p>
               <p className="text-3xl font-black">{analytics.sessionsScheduled}</p>
             </div>
+            <div className="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200">
+              <p className="text-sm text-emerald-700">Context ready</p>
+              <p className="text-3xl font-black text-emerald-900">
+                {analytics.practiceContextReadyCandidates}/{analytics.totalCandidates}
+              </p>
+            </div>
           </div>
           <div className="mt-5 space-y-2 text-sm text-slate-600">
             {Object.entries(analytics.roleCoverage).map(([role, count]) => (
