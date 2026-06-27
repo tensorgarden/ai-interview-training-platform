@@ -39,10 +39,12 @@ describe("admin analytics", () => {
   it("keeps candidates anchored to job-specific signals and resume evidence", () => {
     for (const candidate of demoCandidates) {
       expect(candidate.practiceContext.jobDescriptionSignals.length).toBeGreaterThanOrEqual(2);
+      expect(candidate.practiceContext.companyResearchSignals.length).toBeGreaterThanOrEqual(1);
       expect(candidate.practiceContext.resumeEvidenceAnchors.length).toBeGreaterThanOrEqual(2);
     }
 
     expect(demoCandidates[0].practiceContext.jobDescriptionSignals).toContain("activation analytics");
+    expect(demoCandidates[0].practiceContext.companyResearchSignals).toContain("usage-based pricing motion");
   });
 
   it("flags generic or under-evidenced practice context before sessions become canned", () => {
@@ -54,6 +56,7 @@ describe("admin analytics", () => {
         practiceContext: {
           interviewFormat: "recruiter_screen",
           jobDescriptionSignals: ["communication", "leadership"],
+          companyResearchSignals: ["company research"],
           resumeEvidenceAnchors: ["teamwork"]
         }
       }
@@ -62,7 +65,7 @@ describe("admin analytics", () => {
     expect(gaps).toEqual([
       {
         candidateId: "cand_generic",
-        missing: ["job_description_signals", "resume_evidence_anchors"]
+        missing: ["job_description_signals", "company_research_signals", "resume_evidence_anchors"]
       }
     ]);
   });

@@ -209,6 +209,12 @@ export default async function Home() {
                     <li key={`${candidate.id}-${signal}`}>• {signal}</li>
                   ))}
                 </ul>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Company prep</p>
+                <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
+                  {candidate.practiceContext.companyResearchSignals.slice(0, 2).map((signal) => (
+                    <li key={`${candidate.id}-company-${signal}`}>• {signal}</li>
+                  ))}
+                </ul>
                 <p className="mt-3 text-xs leading-5 text-slate-500">
                   Format: {candidate.practiceContext.interviewFormat.replaceAll("_", " ")} · Proof: {candidate.practiceContext.resumeEvidenceAnchors[0]}
                 </p>

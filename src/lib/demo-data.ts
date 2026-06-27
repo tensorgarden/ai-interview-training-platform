@@ -35,6 +35,7 @@ export const demoCandidates: CandidateProfile[] = [
     practiceContext: {
       interviewFormat: "strategy_panel",
       jobDescriptionSignals: ["activation analytics", "AI onboarding experimentation", "cross-functional prioritization"],
+      companyResearchSignals: ["usage-based pricing motion", "enterprise onboarding expansion"],
       resumeEvidenceAnchors: ["first-invoice activation lift", "self-serve versus coached onboarding trade-off"]
     },
     readinessScore: 88,
@@ -50,6 +51,7 @@ export const demoCandidates: CandidateProfile[] = [
     practiceContext: {
       interviewFormat: "technical_loop",
       jobDescriptionSignals: ["secure provider boundaries", "low-latency scoring", "Supabase RLS ownership"],
+      companyResearchSignals: ["security-conscious AI tooling buyers", "SOC 2 procurement review"],
       resumeEvidenceAnchors: ["transcript scoring architecture", "provider-key isolation plan"]
     },
     readinessScore: 84,
@@ -65,6 +67,7 @@ export const demoCandidates: CandidateProfile[] = [
     practiceContext: {
       interviewFormat: "behavioral_loop",
       jobDescriptionSignals: ["founder-to-PM storytelling", "metric ownership", "coachability under pressure"],
+      companyResearchSignals: ["PLG-to-sales-assist transition", "founder-led customer discovery culture"],
       resumeEvidenceAnchors: ["founder operating cadence", "post-feedback practice plan"]
     },
     readinessScore: 78,

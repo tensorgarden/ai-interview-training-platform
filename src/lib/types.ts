@@ -17,6 +17,7 @@ export interface CandidateProfile {
 export interface CandidatePracticeContext {
   interviewFormat: "recruiter_screen" | "behavioral_loop" | "technical_loop" | "strategy_panel";
   jobDescriptionSignals: string[];
+  companyResearchSignals: string[];
   resumeEvidenceAnchors: string[];
 }
 

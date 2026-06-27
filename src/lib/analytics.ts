@@ -1,6 +1,7 @@
 import type { CandidateProfile, InterviewSession } from "./types";
 
 const MIN_JOB_DESCRIPTION_SIGNALS = 2;
+const MIN_COMPANY_RESEARCH_SIGNALS = 1;
 const MIN_RESUME_EVIDENCE_ANCHORS = 2;
 
 const GENERIC_CONTEXT_TERMS = new Set([
@@ -8,7 +9,8 @@ const GENERIC_CONTEXT_TERMS = new Set([
   "leadership",
   "teamwork",
   "problem solving",
-  "culture fit"
+  "culture fit",
+  "company research"
 ]);
 
 export interface AdminAnalyticsInput {
@@ -16,7 +18,10 @@ export interface AdminAnalyticsInput {
   sessions: InterviewSession[];
 }
 
-export type CandidatePracticeContextMissingReason = "job_description_signals" | "resume_evidence_anchors";
+export type CandidatePracticeContextMissingReason =
+  | "job_description_signals"
+  | "company_research_signals"
+  | "resume_evidence_anchors";
 
 export interface CandidatePracticeContextGap {
   candidateId: string;
@@ -47,6 +52,10 @@ export function auditCandidatePracticeContext(candidates: CandidateProfile[]): C
 
     if (countSpecificContextValues(candidate.practiceContext.jobDescriptionSignals) < MIN_JOB_DESCRIPTION_SIGNALS) {
       missing.push("job_description_signals");
+    }
+
+    if (countSpecificContextValues(candidate.practiceContext.companyResearchSignals) < MIN_COMPANY_RESEARCH_SIGNALS) {
+      missing.push("company_research_signals");
     }
 
     if (countSpecificContextValues(candidate.practiceContext.resumeEvidenceAnchors) < MIN_RESUME_EVIDENCE_ANCHORS) {
