@@ -76,6 +76,13 @@ export interface RubricScore {
   evidence: string;
 }
 
+export interface VerbatimScriptingSignal {
+  type: "exact_memorization" | "generic_ai_phrasing" | "unnatural_transition" | "lack_of_personalization";
+  evidence: string;
+  candidateWords: string;
+  suggestedAlternative: string;
+}
+
 export interface FeedbackReport {
   sessionId: string;
   generatedAt: string;
@@ -85,6 +92,7 @@ export interface FeedbackReport {
   risks: string[];
   recommendedPractice: string;
   rubricScores: RubricScore[];
+  verbatimScriptingSignals?: VerbatimScriptingSignal[];
 }
 
 export interface FollowUpRequest {

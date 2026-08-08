@@ -6,7 +6,8 @@ import type {
   FollowUpResponse,
   InterviewAiProvider,
   RubricScore,
-  TranscriptTurn
+  TranscriptTurn,
+  VerbatimScriptingSignal
 } from "../types";
 
 function latestCandidateAnswer(transcript: TranscriptTurn[]): string {
@@ -66,6 +67,72 @@ function buildRubricScores(transcript: TranscriptTurn[]): RubricScore[] {
             ? "Frames context, action, and result in a STAR-like sequence."
             : "Identifies a concrete next practice loop with coach feedback."
   }));
+}
+
+
+function detectVerbatimScriptingSignals(transcript: TranscriptTurn[]): VerbatimScriptingSignal[] {
+  const signals: VerbatimScriptingSignal[] = [];
+  const candidateAnswers = transcript
+    .filter((turn) => turn.speaker === "candidate")
+    .map((turn) => turn.text);
+
+  // Pattern 1: Corporate jargon common in AI-generated text
+  const corporateJargon = [
+    { pattern: /leveraged synergies/i, alternative: "Describe the specific collaboration.", type: "generic_ai_phrasing" as const },
+    { pattern: /drive alignment/i, alternative: "Explain who agreed to what.", type: "generic_ai_phrasing" as const },
+    { pattern: /move the needle/i, alternative: "Use a concrete business metric.", type: "generic_ai_phrasing" as const },
+    { pattern: /thought leadership/i, alternative: "Show the decision you led.", type: "generic_ai_phrasing" as const }
+  ];
+
+  // Pattern 2: Unnatural transitional phrasing
+  const unnatural = [
+    { pattern: /I believe that [a-z]+ is/i, alternative: "State your opinion directly without preamble.", type: "unnatural_transition" as const },
+    { pattern: /What I would say is/i, alternative: "Skip the meta-commentary—just answer.", type: "unnatural_transition" as const }
+  ];
+
+  // Pattern 3: Lack of personalization (overuse of "we" without "I")
+  for (const answer of candidateAnswers) {
+    // Check for overuse of "we" without personal accountability
+    const weCount = (answer.match(/\bwe\b/gi) || []).length;
+    const iCount = (answer.match(/\b(?:I|my|owned|decided|led)\b/gi) || []).length;
+    
+    if (weCount > 3 && iCount === 0 && answer.length > 150) {
+      signals.push({
+        type: "lack_of_personalization",
+        evidence: "Uses 'we' consistently but never clarifies personal ownership.",
+        candidateWords: answer.substring(0, 80),
+        suggestedAlternative: "Replace one 'we' with 'I' or 'my' and explain your specific role in the outcome."
+      });
+      break;
+    }
+
+    // Check for exact memorization patterns
+    for (const jargon of corporateJargon) {
+      const match = answer.match(jargon.pattern);
+      if (match) {
+        signals.push({
+          type: jargon.type,
+          evidence: `Exact phrase: "${match[0]}"`,
+          candidateWords: answer.substring(Math.max(0, match.index! - 20), Math.min(answer.length, match.index! + match[0].length + 40)),
+          suggestedAlternative: jargon.alternative
+        });
+      }
+    }
+
+    for (const trans of unnatural) {
+      const match = answer.match(trans.pattern);
+      if (match) {
+        signals.push({
+          type: trans.type,
+          evidence: `Unnatural phrasing: "${match[0]}"`,
+          candidateWords: answer.substring(Math.max(0, match.index! - 20), Math.min(answer.length, match.index! + match[0].length + 40)),
+          suggestedAlternative: trans.alternative
+        });
+      }
+    }
+  }
+
+  return signals.slice(0, 2); // Return up to 2 signals
 }
 
 const SCRIPTED_PATTERNS = [
@@ -356,6 +423,8 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
         risks.push(`${ramblingFlag}${roleHint}`);
       }
 
+      const verbatimScriptingSignals = detectVerbatimScriptingSignals(request.transcript);
+
       return {
         sessionId: request.session.id,
         generatedAt: "2026-06-04T19:55:00Z",
@@ -370,7 +439,8 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
         risks,
         recommendedPractice:
           "Practice a 90-second STAR answer: Situation in one sentence, Task/decision in one sentence, Action with one trade-off, Result with one metric, then one reflection. Record two reps before the next coach review.",
-        rubricScores
+        rubricScores,
+        verbatimScriptingSignals: verbatimScriptingSignals.length > 0 ? verbatimScriptingSignals : undefined
       };
     }
   };

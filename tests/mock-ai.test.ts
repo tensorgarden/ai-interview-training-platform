@@ -490,4 +490,44 @@ describe("mock interview AI provider — answer length", () => {
     const lengthRisks = report.risks.filter((risk) => risk.includes("Answer runs long"));
     expect(lengthRisks).toHaveLength(0);
   });
+
+  it("detects generic AI phrasing and lack of personalization in scripted answers", async () => {
+    const provider = createMockInterviewAiProvider();
+    const scriptedTranscript = transcriptWithCandidateAnswer(
+      "What I would say is that we leveraged synergies across the team to drive alignment on the product roadmap. " +
+      "We moved the needle by implementing a new feature set. We believe that this approach demonstrates thought leadership. " +
+      "We delivered the project on time and increased our metrics significantly."
+    );
+
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: scriptedTranscript
+    });
+
+    // Verify verbatim scripting signals are detected
+    expect(report.verbatimScriptingSignals).toBeDefined();
+    expect(report.verbatimScriptingSignals?.length ?? 0).toBeGreaterThan(0);
+    
+    if (report.verbatimScriptingSignals && report.verbatimScriptingSignals.length > 0) {
+      const signal = report.verbatimScriptingSignals[0];
+      expect(["generic_ai_phrasing", "unnatural_transition", "lack_of_personalization"]).toContain(signal.type);
+      expect(signal.evidence).toBeTruthy();
+      expect(signal.suggestedAlternative).toBeTruthy();
+      expect(signal.candidateWords.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("does not flag demo transcript for verbatim scripting signals", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: demoTranscript
+    });
+
+    // Demo answer should be conversational and not overly scripted
+    const hasScriptingSignals = report.verbatimScriptingSignals && report.verbatimScriptingSignals.length > 0;
+    // Allow 0 or minimal signals for natural speech
+    expect(hasScriptingSignals ?? false).toBeFalsy();
+  });
+
 });
