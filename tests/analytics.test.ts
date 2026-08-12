@@ -5,14 +5,15 @@ import {
   buildCandidateProgressTimeline,
   computeAdminAnalytics
 } from "@/lib/analytics";
-import { demoCandidates, demoSessions, questionBank } from "@/lib/demo-data";
+import { demoCandidates, demoCoaches, demoSessions, questionBank } from "@/lib/demo-data";
 
 describe("admin analytics", () => {
   it("summarizes candidate role coverage, completion rate, and average score", () => {
     const analytics = computeAdminAnalytics({
       candidates: demoCandidates,
       sessions: demoSessions,
-      questions: questionBank
+      questions: questionBank,
+      coaches: demoCoaches
     });
 
     expect(analytics.totalCandidates).toBe(3);
@@ -126,5 +127,27 @@ describe("admin analytics", () => {
         missing: ["job_description_signals", "company_research_signals", "resume_evidence_anchors"]
       }
     ]);
+  });
+
+  it("surfaces per-coach workload so admins can spot overloaded coaches", () => {
+    const analytics = computeAdminAnalytics({
+      candidates: demoCandidates,
+      sessions: demoSessions,
+      questions: questionBank,
+      coaches: demoCoaches
+    });
+
+    expect(Object.keys(analytics.coachWorkload)).toHaveLength(2);
+
+    const ava = analytics.coachWorkload["coach_ava"];
+    expect(ava.coachName).toBe("Ava Patel");
+    expect(ava.candidateCount).toBe(2);
+    expect(ava.atRiskCandidateIds).toEqual(["cand_lena"]);
+
+    const omar = analytics.coachWorkload["coach_omar"];
+    expect(omar.coachName).toBe("Omar Chen");
+    expect(omar.candidateCount).toBe(1);
+    expect(omar.averageReadiness).toBe(84);
+    expect(omar.atRiskCandidateIds).toEqual([]);
   });
 });

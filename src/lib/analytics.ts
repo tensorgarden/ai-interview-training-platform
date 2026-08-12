@@ -1,4 +1,4 @@
-import type { CandidatePracticeContext, CandidateProfile, InterviewSession, QuestionBankItem, SessionStatus } from "./types";
+import type { CandidatePracticeContext, CandidateProfile, CoachProfile, InterviewSession, QuestionBankItem, SessionStatus } from "./types";
 
 const MIN_JOB_DESCRIPTION_SIGNALS = 2;
 const MIN_COMPANY_RESEARCH_SIGNALS = 1;
@@ -26,6 +26,7 @@ export interface AdminAnalyticsInput {
   candidates: CandidateProfile[];
   sessions: InterviewSession[];
   questions?: QuestionBankItem[];
+  coaches?: CoachProfile[];
 }
 
 export type CandidatePracticeContextMissingReason =
@@ -54,6 +55,14 @@ export interface InterviewFormatReadinessInput {
   questions: QuestionBankItem[];
 }
 
+export interface CoachWorkloadSummary {
+  coachId: string;
+  coachName: string;
+  candidateCount: number;
+  averageReadiness: number;
+  atRiskCandidateIds: string[];
+}
+
 export interface AdminAnalytics {
   totalCandidates: number;
   sessionsCompleted: number;
@@ -66,6 +75,7 @@ export interface AdminAnalytics {
   formatCheckedUpcomingSessions: number;
   formatReadyUpcomingSessions: number;
   interviewFormatGaps: InterviewFormatPracticeGap[];
+  coachWorkload: Record<string, CoachWorkloadSummary>;
 }
 
 function countSpecificContextValues(values: string[]): number {
@@ -134,7 +144,7 @@ export function auditCandidatePracticeContext(candidates: CandidateProfile[]): C
   });
 }
 
-export function computeAdminAnalytics({ candidates, sessions, questions }: AdminAnalyticsInput): AdminAnalytics {
+export function computeAdminAnalytics({ candidates, sessions, questions, coaches }: AdminAnalyticsInput): AdminAnalytics {
   const completed = sessions.filter((session) => session.status === "completed");
   const scored = completed.filter((session) => typeof session.finalScore === "number");
   const scoreTotal = scored.reduce((sum, session) => sum + (session.finalScore ?? 0), 0);
@@ -147,6 +157,28 @@ export function computeAdminAnalytics({ candidates, sessions, questions }: Admin
   const interviewFormatGaps = questions
     ? auditSessionInterviewFormatReadiness({ candidates, sessions, questions })
     : [];
+
+  const coachById = new Map((coaches ?? []).map((coach) => [coach.id, coach]));
+  const candidatesByCoach = new Map<string, CandidateProfile[]>();
+  for (const candidate of candidates) {
+    const bucket = candidatesByCoach.get(candidate.coachId) ?? [];
+    bucket.push(candidate);
+    candidatesByCoach.set(candidate.coachId, bucket);
+  }
+  const coachWorkload: Record<string, CoachWorkloadSummary> = {};
+  for (const [coachId, coachCandidates] of candidatesByCoach) {
+    const coach = coachById.get(coachId);
+    const readinessTotal = coachCandidates.reduce((sum, c) => sum + c.readinessScore, 0);
+    coachWorkload[coachId] = {
+      coachId,
+      coachName: coach?.fullName ?? coachId,
+      candidateCount: coachCandidates.length,
+      averageReadiness: Math.round(readinessTotal / coachCandidates.length),
+      atRiskCandidateIds: coachCandidates
+        .filter((c) => c.readinessScore < 80)
+        .map((c) => c.id)
+    };
+  }
 
   return {
     totalCandidates: candidates.length,
@@ -161,7 +193,8 @@ export function computeAdminAnalytics({ candidates, sessions, questions }: Admin
     practiceContextGaps,
     formatCheckedUpcomingSessions: questions ? upcomingSessions.length : 0,
     formatReadyUpcomingSessions: questions ? upcomingSessions.length - interviewFormatGaps.length : 0,
-    interviewFormatGaps
+    interviewFormatGaps,
+    coachWorkload
   };
 }
 
