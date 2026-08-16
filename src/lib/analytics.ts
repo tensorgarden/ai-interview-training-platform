@@ -7,6 +7,7 @@ const MIN_RESUME_EVIDENCE_ANCHORS = 2;
 const UPCOMING_SESSION_STATUSES = new Set<SessionStatus>(["draft", "scheduled", "in_progress"]);
 
 const INTERVIEW_FORMAT_QUESTION_SIGNALS: Record<CandidatePracticeContext["interviewFormat"], string[]> = {
+  async_video_screen: ["behavioral", "concise-answer"],
   recruiter_screen: ["behavioral", "coachability", "career-changer"],
   behavioral_loop: ["behavioral", "coachability", "career-changer"],
   technical_loop: ["architecture", "security", "provider-boundary"],

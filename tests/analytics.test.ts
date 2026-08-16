@@ -85,6 +85,53 @@ describe("admin analytics", () => {
     ]);
   });
 
+  it("keeps async video screener practice aligned to timed, self-contained answers", () => {
+    const asyncVideoCandidate = {
+      ...demoCandidates[0],
+      id: "cand_async_video",
+      practiceContext: {
+        ...demoCandidates[0].practiceContext,
+        interviewFormat: "async_video_screen" as const
+      }
+    };
+    const asyncVideoQuestion = questionBank.find((question) => question.id === "q_async_video_answer");
+
+    expect(asyncVideoQuestion?.tags).toContain("async-video");
+    expect(asyncVideoQuestion?.tags).toContain("concise-answer");
+    expect(asyncVideoQuestion?.prompt.toLowerCase()).toContain("ninety seconds");
+
+    const misalignedSession = {
+      ...demoSessions[4],
+      id: "sess_async_video_misaligned",
+      candidateId: "cand_async_video",
+      selectedQuestionIds: ["q_product_strategy"]
+    };
+
+    expect(
+      auditSessionInterviewFormatReadiness({
+        candidates: [asyncVideoCandidate],
+        sessions: [misalignedSession],
+        questions: questionBank
+      })
+    ).toEqual([
+      {
+        sessionId: "sess_async_video_misaligned",
+        candidateId: "cand_async_video",
+        interviewFormat: "async_video_screen",
+        missing: ["format_question_alignment"],
+        requiredQuestionSignals: ["behavioral", "concise-answer"]
+      }
+    ]);
+
+    expect(
+      auditSessionInterviewFormatReadiness({
+        candidates: [asyncVideoCandidate],
+        sessions: [{ ...misalignedSession, selectedQuestionIds: ["q_async_video_answer"] }],
+        questions: questionBank
+      })
+    ).toEqual([]);
+  });
+
   it("includes career-narrative practice for non-linear candidates", () => {
     const careerNarrativeQuestion = questionBank.find((question) => question.tags.includes("career-changer"));
     const lenaFollowUp = demoSessions.find((session) => session.id === "sess_lena_followup");

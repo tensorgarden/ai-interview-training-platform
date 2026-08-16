@@ -135,6 +135,16 @@ export const questionBank: QuestionBankItem[] = [
     difficulty: "foundational",
     tags: ["closing", "company-research", "two-way-fit"],
     rubricFocus: ["Communication", "Role Depth"]
+  },
+  {
+    id: "q_async_video_answer",
+    title: "Timed one-way video answer",
+    prompt:
+      "You have ninety seconds on camera to answer a behavioral prompt with no live interviewer. Open with your decision, keep one concrete evidence anchor, and close with what you would do differently.",
+    roleFocus: "All roles",
+    difficulty: "foundational",
+    tags: ["async-video", "concise-answer", "behavioral", "STAR"],
+    rubricFocus: ["Communication", "Structure"]
   }
 ];
 
