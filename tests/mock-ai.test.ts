@@ -531,3 +531,55 @@ describe("mock interview AI provider — answer length", () => {
   });
 
 });
+
+describe("mock interview AI provider — feedback delivery review gate", () => {
+  it("holds authenticity-risk feedback for coach review before delivery", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I believe that we leveraged synergies across the organization to drive alignment. What I would say is that passionate about moving the needle, we were able to circle back and deep dive into the low-hanging fruit."
+      )
+    });
+
+    expect(report.deliveryHold).toBeDefined();
+    expect(report.deliveryHold?.reasons).toContain("possible_ai_assistance");
+    expect(report.deliveryHold?.reasons).toContain("unverified_personal_attribution");
+    expect(report.deliveryHold?.note).toContain("coach review");
+  });
+
+  it("holds over-polished answers that carry no scripting signals", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I identified the core bottleneck in our onboarding funnel. " +
+        "The activation rate had remained flat for three consecutive quarters. " +
+        "I proposed a structured experiment framework with four treatment arms. " +
+        "The winning variant reduced time-to-first-value by 28 percent, " +
+        "and I presented the results to the executive team with a written recommendation. " +
+        "We adopted the change across all product lines the following quarter."
+      )
+    });
+
+    expect(report.deliveryHold?.reasons).toEqual(["possible_ai_assistance"]);
+    expect(report.deliveryHold?.note).toContain("human check against the transcript");
+  });
+
+  it("delivers coaching risks directly when no authenticity flags fire", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(
+        "Um, so I think the main problem, you know, was that nobody actually owned the funnel. " +
+        "I mean, sales had their version, product had theirs — and honestly, " +
+        "I sort of just started mapping it out because, like, it was blocking everything. " +
+        "We ended up reducing the time-to-value by about 34% which was, uh, pretty solid. " +
+        "I'd say the hardest part was getting everyone to agree on a shared metric."
+      )
+    });
+
+    expect(report.deliveryHold).toBeUndefined();
+    expect(report.risks.some((risk) => risk.includes("Reflection is missing"))).toBe(true);
+  });
+});

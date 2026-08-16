@@ -309,6 +309,27 @@ export default async function Home() {
               </div>
             ))}
           </div>
+          {report.risks.length > 0 ? (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
+              <p className="font-semibold text-slate-950">Feedback risks</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {report.risks.map((risk, index) => (
+                  <li key={`${index}-${risk.slice(0, 24)}`}>{risk}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {report.deliveryHold ? (
+            <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              <Badge tone="amber">Coach review required</Badge>
+              <p className="mt-2 font-semibold">{report.deliveryHold.note}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {report.deliveryHold.reasons.map((reason) => (
+                  <Badge key={reason} tone="amber">{reason.replace(/_/g, " ")}</Badge>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
             <strong>Recommended practice:</strong> {report.recommendedPractice}
           </div>

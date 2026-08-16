@@ -88,6 +88,15 @@ export interface VerbatimScriptingSignal {
   suggestedAlternative: string;
 }
 
+export type FeedbackDeliveryHoldReason =
+  | "possible_ai_assistance"
+  | "unverified_personal_attribution";
+
+export interface FeedbackDeliveryHold {
+  reasons: FeedbackDeliveryHoldReason[];
+  note: string;
+}
+
 export interface FeedbackReport {
   sessionId: string;
   generatedAt: string;
@@ -98,6 +107,7 @@ export interface FeedbackReport {
   recommendedPractice: string;
   rubricScores: RubricScore[];
   verbatimScriptingSignals?: VerbatimScriptingSignal[];
+  deliveryHold?: FeedbackDeliveryHold;
 }
 
 export interface FollowUpRequest {

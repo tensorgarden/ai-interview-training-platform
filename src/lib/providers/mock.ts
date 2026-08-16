@@ -1,5 +1,7 @@
 import { findCandidate, questionBank, rubricCategories } from "../demo-data";
 import type {
+  FeedbackDeliveryHold,
+  FeedbackDeliveryHoldReason,
   FeedbackReport,
   FeedbackReportRequest,
   FollowUpRequest,
@@ -341,6 +343,33 @@ function detectMissingReflection(transcript: TranscriptTurn[]): string | null {
   return null;
 }
 
+const DELIVERY_HOLD_NOTE =
+  "Hold this feedback for coach review before the candidate sees it. " +
+  "Flags that imply AI assistance, rehearsed speech, or weak personal attribution " +
+  "need a human check against the transcript before delivery.";
+
+function buildFeedbackDeliveryHold({
+  scriptedFlag,
+  overPolishedFlag,
+  verbatimScriptingSignals
+}: {
+  scriptedFlag: string | null;
+  overPolishedFlag: string | null;
+  verbatimScriptingSignals: VerbatimScriptingSignal[];
+}): FeedbackDeliveryHold | undefined {
+  const reasons: FeedbackDeliveryHoldReason[] = [];
+
+  if (scriptedFlag || overPolishedFlag) {
+    reasons.push("possible_ai_assistance");
+  }
+
+  if (verbatimScriptingSignals.length > 0) {
+    reasons.push("unverified_personal_attribution");
+  }
+
+  return reasons.length === 0 ? undefined : { reasons, note: DELIVERY_HOLD_NOTE };
+}
+
 export function createMockInterviewAiProvider(): InterviewAiProvider {
   return {
     provider: "mock",
@@ -440,7 +469,8 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
         recommendedPractice:
           "Practice a 90-second STAR answer: Situation in one sentence, Task/decision in one sentence, Action with one trade-off, Result with one metric, then one reflection. Record two reps before the next coach review.",
         rubricScores,
-        verbatimScriptingSignals: verbatimScriptingSignals.length > 0 ? verbatimScriptingSignals : undefined
+        verbatimScriptingSignals: verbatimScriptingSignals.length > 0 ? verbatimScriptingSignals : undefined,
+        deliveryHold: buildFeedbackDeliveryHold({ scriptedFlag, overPolishedFlag, verbatimScriptingSignals })
       };
     }
   };
