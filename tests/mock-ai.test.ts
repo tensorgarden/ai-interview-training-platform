@@ -532,6 +532,66 @@ describe("mock interview AI provider — answer length", () => {
 
 });
 
+describe("mock interview AI provider — async video camera budget", () => {
+  const asyncVideoSession = { ...demoInterviewSession, candidateId: "cand_priya" };
+
+  const overCameraAnswer = [
+    "When my largest mid-market account hit its renewal window, I first pulled the adoption telemetry and found that only two of their six teams had logged into the new workflow in the last ninety days.",
+    "I scheduled a working session with their operations lead and discovered the onboarding playbook we sent assumed a single administrator, while this account actually runs three separate regional teams with their own admins and approval chains.",
+    "I rebuilt the adoption plan around their regional structure, assigned a named enablement lead to each region, and started a weekly adoption review with their head of customer operations.",
+    "Over the following eight weeks the account moved from a churn-risk score of 91 down to 34, and they renewed at a higher tier with three additional seats.",
+    "Looking back, I learned that a churn-risk triage call is only as good as the adoption telemetry behind it, and next time I would pull the usage data before the first conversation."
+  ].join(" ");
+
+  it("flags answers that outrun the ninety-second one-way video window", async () => {
+    const wordCount = overCameraAnswer.split(/\s+/).filter(Boolean).length;
+    expect(wordCount).toBeGreaterThan(150);
+    expect(wordCount).toBeLessThan(250);
+
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: asyncVideoSession,
+      transcript: transcriptWithCandidateAnswer(overCameraAnswer)
+    });
+
+    const cameraRisks = report.risks.filter((risk) => risk.includes("outruns the camera"));
+    expect(cameraRisks).toHaveLength(1);
+    expect(cameraRisks[0]).toContain("ninety-second");
+    expect(cameraRisks[0]).toContain("front-load the decision");
+    expect(report.risks.some((risk) => risk.includes("Answer runs long"))).toBe(false);
+  });
+
+  it("accepts a focused answer that fits the camera window", async () => {
+    const fittedAnswer = [
+      "When a mid-market account showed a churn-risk score of 91, I pulled adoption telemetry and found two of six teams had stopped logging in.",
+      "I rebuilt the adoption plan around their three regional teams and assigned a named enablement lead to each.",
+      "The risk score dropped to 34 in eight weeks and they renewed at a higher tier.",
+      "Next time I would pull the usage data before the first call."
+    ].join(" ");
+    expect(fittedAnswer.split(/\s+/).filter(Boolean).length).toBeLessThanOrEqual(150);
+
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: asyncVideoSession,
+      transcript: transcriptWithCandidateAnswer(fittedAnswer)
+    });
+
+    expect(report.risks.filter((risk) => risk.includes("outruns the camera"))).toHaveLength(0);
+    expect(report.risks.filter((risk) => risk.includes("Answer runs long"))).toHaveLength(0);
+  });
+
+  it("keeps the two-minute guideline for live interview formats", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(overCameraAnswer)
+    });
+
+    expect(report.risks.filter((risk) => risk.includes("outruns the camera"))).toHaveLength(0);
+    expect(report.risks.filter((risk) => risk.includes("Answer runs long"))).toHaveLength(0);
+  });
+});
+
 describe("mock interview AI provider — feedback delivery review gate", () => {
   it("holds authenticity-risk feedback for coach review before delivery", async () => {
     const provider = createMockInterviewAiProvider();

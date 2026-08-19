@@ -16,14 +16,15 @@ describe("admin analytics", () => {
       coaches: demoCoaches
     });
 
-    expect(analytics.totalCandidates).toBe(3);
+    expect(analytics.totalCandidates).toBe(4);
     expect(analytics.sessionsCompleted).toBe(4);
     expect(analytics.averageScore).toBe(83);
     expect(analytics.roleCoverage).toEqual({
       "Product Manager": 2,
-      "Full Stack Engineer": 1
+      "Full Stack Engineer": 1,
+      "Customer Success Manager": 1
     });
-    expect(analytics.practiceContextReadyCandidates).toBe(3);
+    expect(analytics.practiceContextReadyCandidates).toBe(4);
     expect(analytics.practiceContextGaps).toEqual([]);
     expect(analytics.formatCheckedUpcomingSessions).toBe(1);
     expect(analytics.formatReadyUpcomingSessions).toBe(1);
@@ -193,8 +194,8 @@ describe("admin analytics", () => {
 
     const omar = analytics.coachWorkload["coach_omar"];
     expect(omar.coachName).toBe("Omar Chen");
-    expect(omar.candidateCount).toBe(1);
-    expect(omar.averageReadiness).toBe(84);
+    expect(omar.candidateCount).toBe(2);
+    expect(omar.averageReadiness).toBe(83);
     expect(omar.atRiskCandidateIds).toEqual([]);
   });
 });

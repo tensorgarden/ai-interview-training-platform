@@ -1,5 +1,6 @@
 import { findCandidate, questionBank, rubricCategories } from "../demo-data";
 import type {
+  CandidatePracticeContext,
   FeedbackDeliveryHold,
   FeedbackDeliveryHoldReason,
   FeedbackReport,
@@ -302,9 +303,27 @@ function detectRepeatedAnswerOpening(transcript: TranscriptTurn[]): string | nul
 }
 
 const MAX_SINGLE_ANSWER_WORDS = 250;
+const MAX_ASYNC_VIDEO_ANSWER_WORDS = 150;
 
-function detectRamblingAnswerLength(transcript: TranscriptTurn[]): string | null {
+function detectRamblingAnswerLength(
+  transcript: TranscriptTurn[],
+  interviewFormat?: CandidatePracticeContext["interviewFormat"]
+): string | null {
   const candidateAnswers = transcript.filter((turn) => turn.speaker === "candidate");
+
+  if (interviewFormat === "async_video_screen") {
+    for (const answer of candidateAnswers) {
+      const words = answer.text.split(/\s+/).filter(Boolean);
+      if (words.length > MAX_ASYNC_VIDEO_ANSWER_WORDS) {
+        return (
+          `Answer outruns the camera: this ${words.length}-word response is unlikely to fit a ninety-second ` +
+          "one-way video window, and the recording will cut mid-sentence. One-way screeners score completeness, " +
+          "so front-load the decision, keep one evidence anchor and one lesson, and aim for roughly 150 words."
+        );
+      }
+    }
+    return null;
+  }
 
   for (const answer of candidateAnswers) {
     const words = answer.text.split(/\s+/).filter(Boolean);
@@ -447,7 +466,7 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
         risks.push(`${missingReflectionFlag}${roleHint}`);
       }
 
-      const ramblingFlag = detectRamblingAnswerLength(request.transcript);
+      const ramblingFlag = detectRamblingAnswerLength(request.transcript, candidate?.practiceContext.interviewFormat);
       if (ramblingFlag) {
         risks.push(`${ramblingFlag}${roleHint}`);
       }

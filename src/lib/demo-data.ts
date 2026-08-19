@@ -72,6 +72,22 @@ export const demoCandidates: CandidateProfile[] = [
     },
     readinessScore: 78,
     lastActiveAt: "2026-05-28T19:15:00Z"
+  },
+  {
+    id: "cand_priya",
+    fullName: "Priya Natarajan",
+    email: "priya.natarajan@example.test",
+    targetRole: "Customer Success Manager",
+    cohort: "June AI SaaS cohort",
+    coachId: "coach_omar",
+    practiceContext: {
+      interviewFormat: "async_video_screen",
+      jobDescriptionSignals: ["churn-risk triage for mid-market accounts", "adoption playbook execution", "executive business reviews"],
+      companyResearchSignals: ["one-way video screener for CS roles", "expansion revenue motion"],
+      resumeEvidenceAnchors: ["account-save win-back plan", "quarterly adoption workshop cadence"]
+    },
+    readinessScore: 82,
+    lastActiveAt: "2026-05-31T13:45:00Z"
   }
 ];
 
