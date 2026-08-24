@@ -54,6 +54,15 @@ describe("admin analytics", () => {
     expect(demoCandidates[0].practiceContext.companyResearchSignals).toContain("usage-based pricing motion");
   });
 
+  it("makes AI-use boundaries explicit without treating authenticity cues as proof", () => {
+    expect(new Set(demoCandidates.map((candidate) => candidate.practiceContext.aiUsePolicy))).toEqual(
+      new Set(["practice_only", "disclosure_required", "employer_policy_unknown"])
+    );
+    expect(demoCandidates.find((candidate) => candidate.id === "cand_priya")?.practiceContext.aiUsePolicy).toBe(
+      "employer_policy_unknown"
+    );
+  });
+
   it("checks upcoming sessions against the candidate interview format", () => {
     const scheduledBehavioralSession = demoSessions.find((session) => session.id === "sess_lena_followup");
 
@@ -162,6 +171,7 @@ describe("admin analytics", () => {
         id: "cand_generic",
         practiceContext: {
           interviewFormat: "recruiter_screen",
+          aiUsePolicy: 'practice_only',
           jobDescriptionSignals: ["communication", "leadership"],
           companyResearchSignals: ["company research"],
           resumeEvidenceAnchors: ["teamwork"]

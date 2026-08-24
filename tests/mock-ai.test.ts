@@ -606,6 +606,8 @@ describe("mock interview AI provider — feedback delivery review gate", () => {
     expect(report.deliveryHold?.reasons).toContain("possible_ai_assistance");
     expect(report.deliveryHold?.reasons).toContain("unverified_personal_attribution");
     expect(report.deliveryHold?.note).toContain("coach review");
+    expect(report.deliveryHold?.note).toContain("not proof of misconduct");
+    expect(report.deliveryHold?.note).toContain("declared AI-use policy");
   });
 
   it("holds over-polished answers that carry no scripting signals", async () => {

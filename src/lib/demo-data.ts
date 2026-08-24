@@ -34,6 +34,7 @@ export const demoCandidates: CandidateProfile[] = [
     coachId: "coach_ava",
     practiceContext: {
       interviewFormat: "strategy_panel",
+      aiUsePolicy: "practice_only",
       jobDescriptionSignals: ["activation analytics", "AI onboarding experimentation", "cross-functional prioritization"],
       companyResearchSignals: ["usage-based pricing motion", "enterprise onboarding expansion"],
       resumeEvidenceAnchors: ["first-invoice activation lift", "self-serve versus coached onboarding trade-off"]
@@ -50,6 +51,7 @@ export const demoCandidates: CandidateProfile[] = [
     coachId: "coach_omar",
     practiceContext: {
       interviewFormat: "technical_loop",
+      aiUsePolicy: "disclosure_required",
       jobDescriptionSignals: ["secure provider boundaries", "low-latency scoring", "Supabase RLS ownership"],
       companyResearchSignals: ["security-conscious AI tooling buyers", "SOC 2 procurement review"],
       resumeEvidenceAnchors: ["transcript scoring architecture", "provider-key isolation plan"]
@@ -66,6 +68,7 @@ export const demoCandidates: CandidateProfile[] = [
     coachId: "coach_ava",
     practiceContext: {
       interviewFormat: "behavioral_loop",
+      aiUsePolicy: "practice_only",
       jobDescriptionSignals: ["founder-to-PM storytelling", "metric ownership", "coachability under pressure"],
       companyResearchSignals: ["PLG-to-sales-assist transition", "founder-led customer discovery culture"],
       resumeEvidenceAnchors: ["founder operating cadence", "post-feedback practice plan"]
@@ -82,6 +85,7 @@ export const demoCandidates: CandidateProfile[] = [
     coachId: "coach_omar",
     practiceContext: {
       interviewFormat: "async_video_screen",
+      aiUsePolicy: "employer_policy_unknown",
       jobDescriptionSignals: ["churn-risk triage for mid-market accounts", "adoption playbook execution", "executive business reviews"],
       companyResearchSignals: ["one-way video screener for CS roles", "expansion revenue motion"],
       resumeEvidenceAnchors: ["account-save win-back plan", "quarterly adoption workshop cadence"]

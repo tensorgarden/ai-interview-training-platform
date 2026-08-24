@@ -11,6 +11,25 @@ import {
   questionsForSession
 } from "@/lib/demo-data";
 import { createMockInterviewAiProvider } from "@/lib/providers/mock";
+import type { CandidatePracticeContext } from "@/lib/types";
+
+const AI_USE_POLICY_COPY: Record<
+  CandidatePracticeContext["aiUsePolicy"],
+  { label: string; detail: string }
+> = {
+  practice_only: {
+    label: "Practice only, no live assistance",
+    detail: "Use AI for drills and feedback, not during the employer interview."
+  },
+  disclosure_required: {
+    label: "Disclosure required",
+    detail: "Confirm the employer policy and disclose permitted AI support before using it."
+  },
+  employer_policy_unknown: {
+    label: "Employer policy not verified",
+    detail: "Coach must verify the screener rules before the candidate records an answer."
+  }
+};
 
 function Badge({ children, tone = "slate" }: { children: React.ReactNode; tone?: "slate" | "green" | "purple" | "amber" }) {
   const tones = {
@@ -217,6 +236,11 @@ export default async function Home() {
                 </ul>
                 <p className="mt-3 text-xs leading-5 text-slate-500">
                   Format: {candidate.practiceContext.interviewFormat.replaceAll("_", " ")} · Proof: {candidate.practiceContext.resumeEvidenceAnchors[0]}
+                </p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">AI-use guardrail</p>
+                <p className="mt-2 text-xs leading-5 text-slate-600">
+                  <strong>{AI_USE_POLICY_COPY[candidate.practiceContext.aiUsePolicy].label}:</strong>{" "}
+                  {AI_USE_POLICY_COPY[candidate.practiceContext.aiUsePolicy].detail}
                 </p>
               </div>
             ))}

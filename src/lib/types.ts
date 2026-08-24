@@ -14,6 +14,8 @@ export interface CandidateProfile {
   lastActiveAt: string;
 }
 
+export type InterviewAiUsePolicy = "practice_only" | "disclosure_required" | "employer_policy_unknown";
+
 export interface CandidatePracticeContext {
   interviewFormat:
     | "async_video_screen"
@@ -21,6 +23,7 @@ export interface CandidatePracticeContext {
     | "behavioral_loop"
     | "technical_loop"
     | "strategy_panel";
+  aiUsePolicy: InterviewAiUsePolicy;
   jobDescriptionSignals: string[];
   companyResearchSignals: string[];
   resumeEvidenceAnchors: string[];

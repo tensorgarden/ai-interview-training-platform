@@ -365,7 +365,8 @@ function detectMissingReflection(transcript: TranscriptTurn[]): string | null {
 const DELIVERY_HOLD_NOTE =
   "Hold this feedback for coach review before the candidate sees it. " +
   "Flags that imply AI assistance, rehearsed speech, or weak personal attribution " +
-  "need a human check against the transcript before delivery.";
+  "need a human check against the transcript before delivery. " +
+  "Treat these as review cues, not proof of misconduct. Check the candidate's declared AI-use policy before delivery.";
 
 function buildFeedbackDeliveryHold({
   scriptedFlag,
