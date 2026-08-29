@@ -321,6 +321,21 @@ export default async function Home() {
             <h2 className="text-xl font-bold">Rubric scoring and feedback report</h2>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">{report.summary}</p>
+          <div
+            className={`mt-4 rounded-2xl border p-4 text-sm leading-6 ${
+              report.deliveryRoute.channel === "coach"
+                ? "border-amber-200 bg-amber-50 text-amber-900"
+                : "border-emerald-200 bg-emerald-50 text-emerald-900"
+            }`}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone={report.deliveryRoute.channel === "coach" ? "amber" : "green"}>
+                {report.deliveryRoute.channel === "coach" ? "Coach review route" : "Candidate coaching route"}
+              </Badge>
+              <span className="font-semibold">Format-aware delivery</span>
+            </div>
+            <p className="mt-2">{report.deliveryRoute.note}</p>
+          </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {report.rubricScores.map((score) => (
               <div key={score.category} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">

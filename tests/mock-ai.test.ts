@@ -645,3 +645,55 @@ describe("mock interview AI provider — feedback delivery review gate", () => {
     expect(report.risks.some((risk) => risk.includes("Reflection is missing"))).toBe(true);
   });
 });
+
+describe("mock interview AI provider — format-aware delivery routing", () => {
+  const asyncVideoSession = { ...demoInterviewSession, candidateId: "cand_priya" };
+
+  it("routes clean async-video feedback to the candidate as coaching", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: asyncVideoSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I mapped the account health funnel, chose a shared adoption measure, and reduced churn by 18 percent in one quarter."
+      )
+    });
+
+    expect(report.deliveryRoute).toEqual({
+      channel: "candidate",
+      reason: "async_coaching",
+      note: "Coaching-only feedback from an async video screener can go directly to the candidate."
+    });
+  });
+
+  it("routes clean live-loop feedback through a coach", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I mapped the onboarding funnel, chose first successful invoice as the shared activation measure, and reduced time-to-value by 24 percent in six weeks."
+      )
+    });
+
+    expect(report.deliveryRoute).toEqual({
+      channel: "coach",
+      reason: "live_review",
+      note: "Live interview feedback routes through a coach before candidate delivery."
+    });
+  });
+
+  it("keeps authenticity-risk feedback with a coach even for async video", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: asyncVideoSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I believe that we leveraged synergies across the organization to drive alignment. What I would say is that passionate about moving the needle, we were able to circle back and deep dive into the low-hanging fruit."
+      )
+    });
+
+    expect(report.deliveryRoute).toEqual({
+      channel: "coach",
+      reason: "authenticity_hold",
+      note: "Authenticity-related feedback stays with a coach until the transcript is reviewed."
+    });
+  });
+});

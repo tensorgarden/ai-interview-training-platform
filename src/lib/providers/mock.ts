@@ -3,6 +3,7 @@ import type {
   CandidatePracticeContext,
   FeedbackDeliveryHold,
   FeedbackDeliveryHoldReason,
+  FeedbackDeliveryRoute,
   FeedbackReport,
   FeedbackReportRequest,
   FollowUpRequest,
@@ -390,6 +391,36 @@ function buildFeedbackDeliveryHold({
   return reasons.length === 0 ? undefined : { reasons, note: DELIVERY_HOLD_NOTE };
 }
 
+function resolveFeedbackDeliveryRoute({
+  interviewFormat,
+  hasAuthenticityHold
+}: {
+  interviewFormat?: CandidatePracticeContext["interviewFormat"];
+  hasAuthenticityHold: boolean;
+}): FeedbackDeliveryRoute {
+  if (hasAuthenticityHold) {
+    return {
+      channel: "coach",
+      reason: "authenticity_hold",
+      note: "Authenticity-related feedback stays with a coach until the transcript is reviewed."
+    };
+  }
+
+  if (interviewFormat === "async_video_screen") {
+    return {
+      channel: "candidate",
+      reason: "async_coaching",
+      note: "Coaching-only feedback from an async video screener can go directly to the candidate."
+    };
+  }
+
+  return {
+    channel: "coach",
+    reason: "live_review",
+    note: "Live interview feedback routes through a coach before candidate delivery."
+  };
+}
+
 export function createMockInterviewAiProvider(): InterviewAiProvider {
   return {
     provider: "mock",
@@ -473,6 +504,11 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
       }
 
       const verbatimScriptingSignals = detectVerbatimScriptingSignals(request.transcript);
+      const deliveryHold = buildFeedbackDeliveryHold({ scriptedFlag, overPolishedFlag, verbatimScriptingSignals });
+      const deliveryRoute = resolveFeedbackDeliveryRoute({
+        interviewFormat: candidate?.practiceContext.interviewFormat,
+        hasAuthenticityHold: deliveryHold !== undefined
+      });
 
       return {
         sessionId: request.session.id,
@@ -490,7 +526,8 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
           "Practice a 90-second STAR answer: Situation in one sentence, Task/decision in one sentence, Action with one trade-off, Result with one metric, then one reflection. Record two reps before the next coach review.",
         rubricScores,
         verbatimScriptingSignals: verbatimScriptingSignals.length > 0 ? verbatimScriptingSignals : undefined,
-        deliveryHold: buildFeedbackDeliveryHold({ scriptedFlag, overPolishedFlag, verbatimScriptingSignals })
+        deliveryRoute,
+        deliveryHold
       };
     }
   };

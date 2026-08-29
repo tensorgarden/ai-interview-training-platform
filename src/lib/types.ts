@@ -100,6 +100,15 @@ export interface FeedbackDeliveryHold {
   note: string;
 }
 
+export type FeedbackDeliveryChannel = "candidate" | "coach";
+export type FeedbackDeliveryRoutingReason = "async_coaching" | "live_review" | "authenticity_hold";
+
+export interface FeedbackDeliveryRoute {
+  channel: FeedbackDeliveryChannel;
+  reason: FeedbackDeliveryRoutingReason;
+  note: string;
+}
+
 export interface FeedbackReport {
   sessionId: string;
   generatedAt: string;
@@ -110,6 +119,7 @@ export interface FeedbackReport {
   recommendedPractice: string;
   rubricScores: RubricScore[];
   verbatimScriptingSignals?: VerbatimScriptingSignal[];
+  deliveryRoute: FeedbackDeliveryRoute;
   deliveryHold?: FeedbackDeliveryHold;
 }
 
