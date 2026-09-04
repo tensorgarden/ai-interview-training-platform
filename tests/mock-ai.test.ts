@@ -63,8 +63,10 @@ describe("mock interview AI provider", () => {
     expect(first).toEqual(second);
     expect(first.question).toContain("Product Manager");
     expect(first.question).toContain("first-invoice activation lift");
+    expect(first.question).toContain("usage-based pricing motion");
     expect(first.reason).toContain("ownership");
     expect(first.reason).toContain("activation analytics");
+    expect(first.reason).toContain("usage-based pricing motion");
   });
 
   it("falls back to a concrete resume example when candidate context is unavailable", async () => {
@@ -76,6 +78,7 @@ describe("mock interview AI provider", () => {
     });
 
     expect(followUp.question).toContain("Anchor the answer in one concrete resume example.");
+    expect(followUp.question).toContain("one concrete company research signal");
     expect(followUp.question).not.toContain("undefined");
     expect(followUp.reason).toContain("backed by resume evidence");
   });
