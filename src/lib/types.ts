@@ -45,6 +45,7 @@ export interface QuestionBankItem {
   difficulty: "foundational" | "intermediate" | "senior";
   tags: string[];
   rubricFocus: string[];
+  focusTerms: string[];
 }
 
 export interface InterviewSession {

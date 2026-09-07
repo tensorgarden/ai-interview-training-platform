@@ -104,7 +104,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "Product Manager",
     difficulty: "intermediate",
     tags: ["behavioral", "ownership", "ambiguity", "STAR"],
-    rubricFocus: ["Communication", "Structure", "Coachability"]
+    rubricFocus: ["Communication", "Structure", "Coachability"],
+    focusTerms: ["owned", "ownership", "ambiguous", "measurable", "trade-off", "metric"]
   },
   {
     id: "q_product_strategy",
@@ -114,7 +115,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "Product Manager",
     difficulty: "senior",
     tags: ["strategy", "metrics", "prioritization"],
-    rubricFocus: ["Role Depth", "Structure"]
+    rubricFocus: ["Role Depth", "Structure"],
+    focusTerms: ["activation", "prioritize", "prioritization", "trade-off", "experiment", "hypothesis"]
   },
   {
     id: "q_fullstack_architecture",
@@ -124,7 +126,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "Full Stack Engineer",
     difficulty: "senior",
     tags: ["architecture", "security", "supabase", "provider-boundary"],
-    rubricFocus: ["Role Depth", "Communication"]
+    rubricFocus: ["Role Depth", "Communication"],
+    focusTerms: ["latency", "transcript", "rubric", "encrypt", "supabase", "provider"]
   },
   {
     id: "q_career_pivot_narrative",
@@ -134,7 +137,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "Career changers",
     difficulty: "intermediate",
     tags: ["career-changer", "transferable-evidence", "non-linear-path"],
-    rubricFocus: ["Role Depth", "Structure", "Coachability"]
+    rubricFocus: ["Role Depth", "Structure", "Coachability"],
+    focusTerms: ["transferable", "founder", "operator", "job description", "gap", "30 days"]
   },
   {
     id: "q_coachability_followup",
@@ -144,7 +148,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "All roles",
     difficulty: "foundational",
     tags: ["coachability", "reflection", "growth"],
-    rubricFocus: ["Coachability", "Communication"]
+    rubricFocus: ["Coachability", "Communication"],
+    focusTerms: ["feedback", "changed", "adjusted", "practice"]
   },
   {
     id: "q_closing_questions",
@@ -154,7 +159,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "All roles",
     difficulty: "foundational",
     tags: ["closing", "company-research", "two-way-fit"],
-    rubricFocus: ["Communication", "Role Depth"]
+    rubricFocus: ["Communication", "Role Depth"],
+    focusTerms: ["closing question", "company research", "success criterion", "evaluate"]
   },
   {
     id: "q_async_video_answer",
@@ -164,7 +170,8 @@ export const questionBank: QuestionBankItem[] = [
     roleFocus: "All roles",
     difficulty: "foundational",
     tags: ["async-video", "concise-answer", "behavioral", "STAR"],
-    rubricFocus: ["Communication", "Structure"]
+    rubricFocus: ["Communication", "Structure"],
+    focusTerms: ["ninety seconds", "decision", "evidence", "differently", "camera"]
   }
 ];
 

@@ -363,6 +363,42 @@ function detectMissingReflection(transcript: TranscriptTurn[]): string | null {
   return null;
 }
 
+const MIN_DRIFT_CHECK_WORDS = 40;
+const MIN_DRIFT_CHECK_TERM_HITS = 2;
+
+function escapeFocusTerm(term: string): string {
+  return term.replace(/[^a-z0-9\s-]/gi, "\\$&");
+}
+
+function detectQuestionDrift(transcript: TranscriptTurn[]): string | null {
+  const candidateAnswers = transcript.filter((turn) => turn.speaker === "candidate");
+
+  for (const answer of candidateAnswers) {
+    if (!answer.questionId) continue;
+    const question = questionBank.find((item) => item.id === answer.questionId);
+    if (!question || question.focusTerms.length === 0) continue;
+
+    const words = answer.text.split(/\s+/).filter(Boolean);
+    if (words.length < MIN_DRIFT_CHECK_WORDS) continue;
+
+    const lowered = answer.text.toLowerCase();
+    const matchedTerms = question.focusTerms.filter((term) =>
+      new RegExp(`\\b${escapeFocusTerm(term)}\\b`, "i").test(lowered)
+    );
+
+    if (matchedTerms.length >= MIN_DRIFT_CHECK_TERM_HITS) continue;
+
+    return (
+      `Answer may drift from the question: it engages ${matchedTerms.length} of the expected focus areas for ` +
+      `"${question.title}" (for example ${question.focusTerms.slice(0, 3).join(", ")}). ` +
+      "AI screeners and structured interviews score whether the answer engages the question's core signals, " +
+      "so reconnect the story to what the interviewer actually asked."
+    );
+  }
+
+  return null;
+}
+
 const DELIVERY_HOLD_NOTE =
   "Hold this feedback for coach review before the candidate sees it. " +
   "Flags that imply AI assistance, rehearsed speech, or weak personal attribution " +
@@ -502,6 +538,11 @@ export function createMockInterviewAiProvider(): InterviewAiProvider {
       const missingReflectionFlag = detectMissingReflection(request.transcript);
       if (missingReflectionFlag) {
         risks.push(`${missingReflectionFlag}${roleHint}`);
+      }
+
+      const questionDriftFlag = detectQuestionDrift(request.transcript);
+      if (questionDriftFlag) {
+        risks.push(questionDriftFlag);
       }
 
       const ramblingFlag = detectRamblingAnswerLength(request.transcript, candidate?.practiceContext.interviewFormat);

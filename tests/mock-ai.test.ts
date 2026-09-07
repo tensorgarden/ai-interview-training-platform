@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMockInterviewAiProvider } from "@/lib/providers/mock";
-import { demoInterviewSession, demoTranscript } from "@/lib/demo-data";
+import { demoInterviewSession, demoTranscript, questionBank } from "@/lib/demo-data";
 import type { TranscriptTurn } from "@/lib/types";
 
 function transcriptWithCandidateAnswer(text: string): TranscriptTurn[] {
@@ -698,5 +698,71 @@ describe("mock interview AI provider — format-aware delivery routing", () => {
       reason: "authenticity_hold",
       note: "Authenticity-related feedback stays with a coach until the transcript is reviewed."
     });
+  });
+});
+
+describe("mock interview AI provider — question relevance", () => {
+  it("flags a developed answer that drifts from the question's focus signals", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I kept everyone in the loop by syncing with sales and support on a weekly basis. " +
+        "The shared document stayed current, and the team appreciated the extra visibility. " +
+        "It made the department feel more connected and improved the overall mood. " +
+        "We mostly just talked things through until everyone felt heard."
+      )
+    });
+
+    const driftRisks = report.risks.filter((risk) => risk.includes("drift from the question"));
+    expect(driftRisks).toHaveLength(1);
+    expect(driftRisks[0]).toContain("Ownership under ambiguity");
+    expect(driftRisks[0]).toContain("core signals");
+    expect(driftRisks[0]).toContain("what the interviewer actually asked");
+  });
+
+  it("accepts a developed answer that engages the question's focus signals", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer(
+        "I owned the activation redesign end to end. The problem was ambiguous because each team tracked " +
+        "a different definition of success. I mapped the funnel, chose first successful invoice as the shared " +
+        "metric, and reduced time-to-value by 24 percent in six weeks."
+      )
+    });
+
+    expect(report.risks.filter((risk) => risk.includes("drift from the question"))).toHaveLength(0);
+  });
+
+  it("does not flag short answers that skip the question's focus signals", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: transcriptWithCandidateAnswer("We aligned the team around the roadmap and everyone was happy.")
+    });
+
+    expect(report.risks.filter((risk) => risk.includes("drift from the question"))).toHaveLength(0);
+  });
+
+  it("does not flag the demo transcript as drifting from its question", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: demoTranscript
+    });
+
+    expect(report.risks.filter((risk) => risk.includes("drift from the question"))).toHaveLength(0);
+  });
+});
+
+describe("question bank focus coverage", () => {
+  it("gives every question at least two focus signals for relevance checking", () => {
+    for (const question of questionBank) {
+      expect(question.focusTerms.length).toBeGreaterThanOrEqual(2);
+      for (const term of question.focusTerms) {
+        expect(term.trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 });

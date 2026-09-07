@@ -263,6 +263,9 @@ export default async function Home() {
                   <Badge tone="purple">{question.difficulty}</Badge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{question.prompt}</p>
+                <p className="mt-2 text-xs font-medium text-indigo-700">
+                  Focus areas: {question.focusTerms.join(", ")}
+                </p>
               </article>
             ))}
           </div>
