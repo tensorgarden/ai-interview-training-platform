@@ -131,6 +131,35 @@ describe("mock interview AI provider", () => {
     expect(communication?.evidence).toBe("Needs one sharper measurable outcome.");
   });
 
+  it("ignores quantities in coach prompts when checking candidate outcome evidence", async () => {
+    const provider = createMockInterviewAiProvider();
+    const report = await provider.generateFeedbackReport({
+      session: demoInterviewSession,
+      transcript: [
+        {
+          id: "turn_coach_metric",
+          sessionId: "sess_test",
+          speaker: "coach",
+          timestamp: "00:00",
+          text: "What did you improve in the first 90 days?",
+          questionId: "q_behavioral_ownership"
+        },
+        {
+          id: "turn_candidate_vague",
+          sessionId: "sess_test",
+          speaker: "candidate",
+          timestamp: "00:20",
+          text: "I aligned the team and significantly improved activation after launch.",
+          questionId: "q_behavioral_ownership"
+        }
+      ]
+    });
+    const communication = report.rubricScores.find((score) => score.category === "Communication");
+
+    expect(communication?.score).toBe(18);
+    expect(communication?.evidence).toBe("Needs one sharper measurable outcome.");
+  });
+
   it("does not flag scripted language when transcript uses concrete evidence", async () => {
     const provider = createMockInterviewAiProvider();
 
