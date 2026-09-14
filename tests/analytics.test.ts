@@ -208,4 +208,28 @@ describe("admin analytics", () => {
     expect(omar.averageReadiness).toBe(83);
     expect(omar.atRiskCandidateIds).toEqual([]);
   });
+
+  it("flags a scheduled session when its selected question has disappeared from the bank", () => {
+    const scheduledSession = demoSessions.find((session) => session.status === "scheduled");
+
+    if (!scheduledSession) {
+      throw new Error("Missing scheduled demo session");
+    }
+
+    expect(
+      auditSessionInterviewFormatReadiness({
+        candidates: demoCandidates,
+        sessions: [{ ...scheduledSession, id: "sess_stale_question", selectedQuestionIds: ["q_removed"] }],
+        questions: questionBank
+      })
+    ).toEqual([
+      {
+        sessionId: "sess_stale_question",
+        candidateId: scheduledSession.candidateId,
+        interviewFormat: "behavioral_loop",
+        missing: ["format_question_alignment"],
+        requiredQuestionSignals: ["behavioral", "coachability", "career-changer"]
+      }
+    ]);
+  });
 });
